@@ -18,17 +18,18 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const page = menuPages[slug as keyof typeof menuPages];
-
   if (!page) {
     return {
       title: "Menu | Cafe Roma",
+      description: "Cafe Roma QR Menu",
     };
   }
 
   return {
-    title: `${page.title} | Cafe Roma`,
-    description: page.subtitle,
+    title: `${page.title.en} | Cafe Roma`,
+    description: page.subtitle.en,
   };
+
 }
 
 export default async function CategoryPage({ params }: PageProps) {
