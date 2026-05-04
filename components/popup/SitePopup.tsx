@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
-import type { PopupConfig } from "@/config/popups";
+import type { PopupConfig } from "../../config/popups";
 
 type SitePopupProps = {
   popup: PopupConfig;

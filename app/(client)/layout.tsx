@@ -37,7 +37,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <LanguageProvider>{children}</LanguageProvider>
-        <PopupProvider />
+        {/* <PopupProvider /> */}
       </body>
     </html>
   );
