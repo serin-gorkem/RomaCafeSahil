@@ -12,6 +12,8 @@ const footerBadges = [
 ];
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-center gap-10 px-5 py-16 md:flex-row md:gap-20 md:py-24">
@@ -33,7 +35,7 @@ export default function Footer() {
 
       <div className="border-t border-neutral-200 py-6 text-center">
         <p className="font-serif text-sm text-neutral-600">
-          © 2026 Cafe Roma Kuşadası
+          © {currentYear} Cafe Roma Kuşadası
         </p>
       </div>
     </footer>
