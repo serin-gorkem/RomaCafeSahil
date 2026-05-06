@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import MenuCategoryPage from "../../../components/menu/MenuCategoryPage";
-import { menuCategories } from "../../../data/menuCategories";
-import { menuPages } from "../../../data/menuPages";
+import { MENU_CATEGORY_BY_SLUG_QUERY } from "../../../sanity/lib/queries";
+import { serverClient } from "../../../sanity/lib/serverClient";
+import type { SanityMenuCategory } from "../../../sanity/lib/types";
 
 type PageProps = {
   params: Promise<{
@@ -9,15 +10,18 @@ type PageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return menuCategories.map((category) => ({
-    slug: category.slug,
-  }));
-}
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const page = menuPages[slug as keyof typeof menuPages];
+
+  const page = await serverClient.fetch<SanityMenuCategory | null>(
+    MENU_CATEGORY_BY_SLUG_QUERY,
+    { slug },
+    { cache: "no-store" }
+  );
+
   if (!page) {
     return {
       title: "Menu | Cafe Roma",
@@ -27,14 +31,18 @@ export async function generateMetadata({ params }: PageProps) {
 
   return {
     title: `${page.title.en} | Cafe Roma`,
-    description: page.subtitle.en,
+    description: page.subtitle?.en ?? "Cafe Roma QR Menu",
   };
-
 }
 
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params;
-  const page = menuPages[slug as keyof typeof menuPages];
+
+  const page = await serverClient.fetch<SanityMenuCategory | null>(
+    MENU_CATEGORY_BY_SLUG_QUERY,
+    { slug },
+    { cache: "no-store" }
+  );
 
   if (!page) {
     notFound();

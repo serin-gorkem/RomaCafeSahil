@@ -5,35 +5,36 @@ import Link from "next/link";
 
 import Footer from "../../components/home/Footer";
 import Navbar from "../../components/home/Navbar";
-import {
-  UI_TEXT,
-  getLocalizedText,
-  type Language,
-} from "../../data/i18n";
+import { UI_TEXT, getLocalizedText, type Language } from "../../data/i18n";
+import { urlFor } from "../../sanity/lib/image";
 import type {
-  MenuContentBlock,
-  MenuItem,
-  MenuPage,
-} from "../../data/menuPages";
+  SanityMenuBlock,
+  SanityMenuCategory,
+  SanityMenuItem,
+} from "../../sanity/lib/types";
+import { formatPrice } from "../../utils/formatPrice";
 import { useLanguage } from "../i18n/LanguageProvider";
 
 type MenuCategoryPageProps = {
-  page: MenuPage;
+  page: SanityMenuCategory;
 };
 
 function MenuItemRow({
   item,
   language,
 }: {
-  item: MenuItem;
+  item: SanityMenuItem;
   language: Language;
 }) {
+  const priceText = formatPrice(item.price);
+
   return (
     <article className="rounded-2xl border border-black/10 bg-white/85 p-5 shadow-sm backdrop-blur">
       <div className="flex items-start justify-between gap-5">
         <div>
           <h3 className="font-serif text-2xl text-neutral-950">
             {getLocalizedText(item.name, language)}
+            {item.calories ? ` - ${item.calories} kcal` : ""}
           </h3>
 
           {item.description && (
@@ -43,9 +44,9 @@ function MenuItemRow({
           )}
         </div>
 
-        {item.price && (
+        {priceText && (
           <p className="shrink-0 text-lg font-semibold text-neutral-950">
-            {item.price}
+            {priceText}
           </p>
         )}
       </div>
@@ -57,22 +58,31 @@ function MenuBlock({
   block,
   language,
 }: {
-  block: MenuContentBlock;
+  block: SanityMenuBlock;
   language: Language;
 }) {
   const imageFirst = block.imageSide === "left";
 
-  const imageAlt =
-    block.imageAlt ??
+  const imageAlt = block.imageAlt ??
     block.title ?? {
       en: "Cafe Roma menu image",
       tr: "Cafe Roma menü görseli",
     };
 
-  const imageElement = block.image ? (
+  const imageUrl = block.image
+    ? urlFor(block.image)
+        .width(1100)
+        .height(1300)
+        .fit("crop")
+        .format("webp")
+        .quality(82)
+        .url()
+    : null;
+
+  const imageElement = imageUrl ? (
     <div className="relative min-h-[300px] overflow-hidden rounded-3xl shadow-xl ring-1 ring-white/20 md:min-h-[520px]">
       <Image
-        src={block.image}
+        src={imageUrl}
         alt={getLocalizedText(imageAlt, language)}
         fill
         sizes="(min-width: 1024px) 448px, 100vw"
@@ -92,18 +102,15 @@ function MenuBlock({
               {getLocalizedText(block.title, language)}
             </h2>
           )}
-
         </div>
       )}
 
       <div className="space-y-4">
-        {block.items.map((item) => (
-          <MenuItemRow
-            key={item.name.en}
-            item={item}
-            language={language}
-          />
-        ))}
+        {(block.items ?? [])
+          .filter((item) => item && item._id)
+          .map((item) => (
+            <MenuItemRow key={item._id} item={item} language={language} />
+          ))}
       </div>
     </div>
   );
@@ -127,6 +134,8 @@ export default function MenuCategoryPage({ page }: MenuCategoryPageProps) {
   const t = (text: keyof typeof UI_TEXT) =>
     getLocalizedText(UI_TEXT[text], language);
 
+  const blocks = (page.blocks ?? []).filter((block) => block && block._id);
+
   return (
     <>
       <Navbar />
@@ -134,7 +143,7 @@ export default function MenuCategoryPage({ page }: MenuCategoryPageProps) {
       <main className="min-h-screen bg-[#f5efe3] pt-20">
         <section className="relative overflow-hidden px-5 py-10 md:py-16">
           <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[url('/images/caferoma-bg.webp')] bg-[length:100%_auto] bg-top bg-repeat-y lg:bg-[url('/images/caferoma-bg-yatay.webp')]" />
+            <div className="absolute inset-0 bg-[url('/images/caferoma-bg.webp')] bg-size-[100%_auto] bg-top bg-repeat-y lg:bg-[url('/images/caferoma-bg-yatay.webp')]" />
             <div className="absolute inset-0 bg-black/30" />
           </div>
 
@@ -149,13 +158,19 @@ export default function MenuCategoryPage({ page }: MenuCategoryPageProps) {
             </div>
 
             <div className="space-y-14 md:space-y-20">
-              {page.blocks.map((block) => (
-                <MenuBlock
-                  key={block.id}
-                  block={block}
-                  language={language}
-                />
-              ))}
+              {blocks.length > 0 ? (
+                blocks.map((block) => (
+                  <MenuBlock
+                    key={block._id}
+                    block={block}
+                    language={language}
+                  />
+                ))
+              ) : (
+                <div className="rounded-2xl bg-white/85 p-6 text-center text-neutral-700">
+                  Bu kategori için henüz menü içeriği eklenmemiş.
+                </div>
+              )}
             </div>
           </div>
         </section>
