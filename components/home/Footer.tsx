@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const footerBadges = [
   {
@@ -36,6 +37,15 @@ export default function Footer() {
       <div className="border-t border-neutral-200 py-6 text-center">
         <p className="font-serif text-sm text-neutral-600">
           © {currentYear} Cafe Roma Kuşadası
+        </p>
+      </div>
+      <div className="border-t border-neutral-200 py-6 text-center">
+        <p className="font-serif text-sm text-neutral-600">
+          © 2026 Bu Menu{" "}
+          <Link className="text-blue-600" href="https://fionmedya.com/">
+            Fion Medya {" "}
+          </Link>
+          tarafından hazırlanmıştır. Tüm hakları saklıdır.
         </p>
       </div>
     </footer>
